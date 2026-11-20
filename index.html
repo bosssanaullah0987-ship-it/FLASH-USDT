@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Real USDT Wallet (TRC20)</title>
+<title>USDT TRC20 Wallet</title>
 <style>
 *{box-sizing:border-box}
 body{
@@ -16,13 +16,18 @@ body{
   border-radius:20px;
 }
 .tag{color:#36d399;font-size:12px;font-weight:bold;word-break:break-all}
+.flash-tag{color:#fbbf24;font-size:12px;font-weight:bold;margin-top:14px}
 .logo{font-size:25px;font-weight:bold;margin:16px 0}
 .balance{font-size:32px;font-weight:bold;margin:10px 0}
+.flash-balance{font-size:24px;font-weight:bold;color:#fbbf24;margin:6px 0}
 .muted{color:#aab7c4;font-size:13px}
 button{
   padding:13px;border:0;border-radius:10px;
   background:#20b486;color:white;font-weight:bold;
   width:100%;margin-top:10px;cursor:pointer;
+}
+button.flash-btn{
+  background:#d97706;color:white;
 }
 button:disabled{opacity:0.6;cursor:not-allowed}
 input{
@@ -45,6 +50,10 @@ input{
   <div class="balance"><span id="balance">0.00</span> USDT</div>
   <div class="muted" id="accountAddr">Not connected</div>
 
+  <div class="flash-tag">⚡ FLASH / DEMO BALANCE (NOT REAL CHAIN)</div>
+  <div class="flash-balance"><span id="flashBalance">0</span> USDT</div>
+  <button class="flash-btn" onclick="addFlashUSDT()">Add 1,000,000 Flash USDT</button>
+
   <h3>Send Real TRC20 USDT</h3>
   <input id="receiver" placeholder="Receiver TRON address (T...)">
   <input id="amount" type="number" step="any" placeholder="Amount of USDT">
@@ -57,12 +66,12 @@ input{
 </div>
 
 <script>
-// TRON Mainnet USDT (TRC20) Contract Address
 const TRC20_USDT_CONTRACT = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
 const DECIMALS = 6;
 
 let tronWebObj = null;
 let userAddress = null;
+let flashBalance = 0;
 
 function addHistory(htmlContent){
   const historyBox = document.getElementById("history");
@@ -73,6 +82,12 @@ function addHistory(htmlContent){
   item.className = "item";
   item.innerHTML = htmlContent;
   historyBox.prepend(item);
+}
+
+function addFlashUSDT(){
+  flashBalance += 1000000;
+  document.getElementById("flashBalance").textContent = flashBalance.toLocaleString("en-US");
+  addHistory("Added <b>1,000,000</b> Flash/Demo USDT (UI only, not on TRON blockchain)");
 }
 
 function getTronWeb(){
@@ -91,7 +106,6 @@ async function connectTron(){
       await window.tronLink.request({ method: "tron_requestAccounts" });
     }
 
-    // Wait briefly if provider initializes
     for (let i = 0; i < 10; i++) {
       tronWebObj = getTronWeb();
       if (tronWebObj) break;
@@ -153,7 +167,7 @@ async function sendTRC20USDT(){
     const rawAmount = Math.round(amountNum * Math.pow(10, DECIMALS));
 
     const txId = await contract.transfer(receiver, rawAmount).send({
-      feeLimit: 100_000_000 // up to 100 TRX fee limit
+      feeLimit: 100_000_000
     });
 
     addHistory(`Sent ${amountNum} USDT (TRC20) to <b>${receiver}</b><br>TxID: ${txId}`);
